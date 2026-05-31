@@ -19,7 +19,7 @@ def create_inline_markup(buttons, row_width=2):
     markup.add(*buttons)
     return markup
 
-# Главное меню
+
 def gen_markup_start():
     buttons = [
         InlineKeyboardButton('📋 Все команды', callback_data='show_help'),
@@ -29,7 +29,7 @@ def gen_markup_start():
     ]
     return create_inline_markup(buttons)
 
-# Кнопки возврата
+
 def back_markup_start():
     buttons = [
         InlineKeyboardButton('🔙 К командам', callback_data='show_help'),
@@ -37,7 +37,6 @@ def back_markup_start():
     ]
     return create_inline_markup(buttons, row_width=1)
 
-# Меню всех команд
 def gen_markup_comm():
     buttons = [
         InlineKeyboardButton('⏱️ Таймер', callback_data='timer'),
@@ -50,7 +49,6 @@ def gen_markup_comm():
     ]
     return create_inline_markup(buttons, row_width=2)
 
-# Меню после генерации изображения
 def gen_markup_after_image():
     buttons = [
         InlineKeyboardButton('🎨 Сгенерировать ещё', callback_data='ai_image'),
@@ -59,7 +57,6 @@ def gen_markup_after_image():
     ]
     return create_inline_markup(buttons, row_width=2)
 
-# Меню подсчетов
 def gen_markup_text_ct():
     buttons = [
         InlineKeyboardButton('🔤 Символы', callback_data='count_symbols'),
@@ -68,7 +65,7 @@ def gen_markup_text_ct():
     ]
     return create_inline_markup(buttons, row_width=2)
 
-# Меню игр
+
 def gen_markup_games():
     buttons = [
         InlineKeyboardButton('🎲 Кубик d6', callback_data='cl_d6'),
@@ -78,7 +75,6 @@ def gen_markup_games():
     ]
     return create_inline_markup(buttons, row_width=2)
 
-# Все кубики
 def gen_markup_roll_dice_all():
     buttons = [
         InlineKeyboardButton('d4', callback_data='cl_d4'),
@@ -92,7 +88,7 @@ def gen_markup_roll_dice_all():
     ]
     return create_inline_markup(buttons, row_width=3)
 
-# Кнопки перевода
+
 def gen_markup_for_text():
     buttons = [
         InlineKeyboardButton('🇬🇧 Английский', callback_data='to_en'),
@@ -141,7 +137,6 @@ def end_roll_dice_d20():
 def end_roll_dice_d100():
     return create_dice_end_markup('cl_d100')
 
-# Кнопки для монетки
 def markup_coin_end():
     buttons = [
         InlineKeyboardButton('🪙 Ещё раз', callback_data='cl_coin'),
@@ -150,7 +145,6 @@ def markup_coin_end():
     ]
     return create_inline_markup(buttons, row_width=1)
 
-# Кнопки после генерации пароля
 def gen_markup_end_password():
     buttons = [
         InlineKeyboardButton('🔐 Ещё пароль', callback_data='gen_password'),
@@ -174,7 +168,7 @@ def gen_markup_end_timer():
     ]
     return create_inline_markup(buttons, row_width=1)
 
-# Функция безопасного редактирования сообщений
+
 def safe_edit_message(bot, chat_id, message_id, text, reply_markup=None, parse_mode=None):
     """Безопасное редактирование сообщения с обработкой ошибок"""
     try:
@@ -188,10 +182,10 @@ def safe_edit_message(bot, chat_id, message_id, text, reply_markup=None, parse_m
         return True
     except Exception as e:
         if "message is not modified" in str(e):
-            # Сообщение не изменилось - это нормально
+
             return True
         elif "there is no text" in str(e) or "message to edit" in str(e):
-            # Сообщение не имеет текста (возможно фото) - отправляем новое
+
             bot.send_message(chat_id, text, reply_markup=reply_markup, parse_mode=parse_mode)
             return True
         else:
@@ -204,10 +198,10 @@ def safe_edit_message(bot, chat_id, message_id, text, reply_markup=None, parse_m
 def generate_image_handler(message, prompt):
     """Обработчик генерации изображения"""
     try:
-        # Показываем "печатает"
+
         bot.send_chat_action(message.chat.id, 'typing')
         
-        # Отправляем временное сообщение
+
         status_msg = bot.send_message(
             message.chat.id, 
             "🎨 Генерирую изображение по запросу:\n"
@@ -216,19 +210,18 @@ def generate_image_handler(message, prompt):
             parse_mode="Markdown"
         )
         
-        # Обновляем статус на "загружаю фото"
+
         bot.send_chat_action(message.chat.id, 'upload_photo')
         
-        # Генерируем изображение
+
         image_path = generate_image(prompt, "images/generate_image.png")
-        
-        # Удаляем временное сообщение
+
         try:
             bot.delete_message(message.chat.id, status_msg.message_id)
         except:
             pass
         
-        # Отправляем результат
+
         with open(image_path, "rb") as image:
             bot.send_photo(
                 message.chat.id, 
@@ -238,7 +231,7 @@ def generate_image_handler(message, prompt):
                 reply_markup=gen_markup_after_image()
             )
         
-        # Удаляем временный файл
+
         try:
             os.remove(image_path)
         except:
@@ -262,7 +255,6 @@ def generate_image_handler(message, prompt):
                 reply_markup=gen_markup_after_image()
             )
 
-# Команда для генерации изображения
 @bot.message_handler(commands=['generate', 'image', 'ai'])
 def image_generate_command(message):
     """Обработчик команды /generate"""
@@ -306,10 +298,10 @@ def start_timer(seconds, chat_id, bot, stop_markup=None, end_markup=None):
         else:
             msg = bot.send_message(chat_id, f'⏱️ Таймер на {seconds} секунд запущен')
         
-        # Таймер на удаление сообщения через указанное время
+
         threading.Timer(seconds, lambda: bot.delete_message(chat_id, msg.message_id)).start()
         
-        # Ожидание
+
         for i in range(seconds):
             if stop_event.is_set():
                 return
@@ -393,7 +385,7 @@ def generate_password(length=12, include_upper=True, include_lower=True, include
     while len(password_chars) < length:
         password_chars.append(random.choice(characters))
     
-    # Перемешиваем
+
     random.shuffle(password_chars)
     
     return ''.join(password_chars)
@@ -858,7 +850,6 @@ def roll_command(message):
     else:
         bot.reply_to(message, f"🎲 {logic_d6()}", reply_markup=end_roll_dice_d6())
 
-# Монетка
 @bot.message_handler(commands=['coin'])
 def coin_command(message):
     bot.reply_to(message, f"🪙 Выпало: {coin()}", reply_markup=markup_coin_end())
@@ -868,7 +859,7 @@ def coin_command(message):
 def handle_messages(message):
     state = user_states.get(message.chat.id)
     
-    # Обработка генерации изображений
+
     if state == 'waiting_image_prompt':
         if message.text and not message.text.startswith('/'):
             generate_image_handler(message, message.text)
@@ -876,8 +867,7 @@ def handle_messages(message):
         else:
             bot.reply_to(message, "❌ Пожалуйста, отправьте текстовое описание изображения")
         return
-    
-    # Остальные состояния
+
     if state == 'waiting_timer':
         try:
             sec = int(message.text)
@@ -916,7 +906,6 @@ def handle_messages(message):
             bot.reply_to(message, '❌ Введите число, например: 12', reply_markup=gen_markup_end_password())
     
     else:
-        # Неизвестная команда
         if not message.text.startswith('/'):
             bot.reply_to(
                 message,
@@ -929,7 +918,7 @@ def handle_messages(message):
 
 # ==================== ЗАПУСК БОТА ====================
 if __name__ == '__main__':
-    # Создаем папку для изображений если её нет
+
     if not os.path.exists('images'):
         os.makedirs('images')
     
@@ -938,8 +927,7 @@ if __name__ == '__main__':
     print("  /start - Главное меню")
     print("  /generate [описание] - Генерация изображения")
     print("  /help - Справка")
-    
-    # Запускаем бота с обработкой ошибок
+
     try:
         bot.infinity_polling(none_stop=True, timeout=60)
     except Exception as e:
